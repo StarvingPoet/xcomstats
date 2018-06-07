@@ -12,3 +12,4 @@ catch (Exception $e)
 {
     file_put_contents('error.log', print_r($e,true));
 }
+?>
