@@ -40,7 +40,7 @@ class Base
     {
         if (!$this->is_connected) $this->connect(); /// @todo This is a client function, fixme!
         if ($opcode == 'hybil10')
-        {
+        {           
             $this->write($this->hybi10Encode($payload));
         }
         else
@@ -114,7 +114,7 @@ class Base
      * This allows for more complex data structures to be sent
      */
     private function hybi10Encode($payload, $type = 'text', $masked = true)
-    {
+    {       
         $frameHead = array();
         $frame = '';
         $payloadLength = strlen($payload);
@@ -176,6 +176,7 @@ class Base
         for ($i = 0; $i<$payloadLength; $i++)
             $frame .= ($masked===true) ? $payload[$i] ^ $mask[$i % 4] : $payload[$i];
         return $frame;
+
     }
 
     public function receive()
@@ -320,14 +321,19 @@ class Base
         $this->is_closing = true;
         $response = $this->receive(); // Receiving a close frame will close the socket now.
         return $response;
+    }
+    
+    protected function write($data) {
+        
+        //$written = fwrite($this->socket, $data);
+        for ($written = 0; $written < strlen($data); $written += $fwrite) {
+            $fwrite = stream_socket_sendto($this->socket, $data);
+
+            if ($fwrite === false){
+                throw new ConnectionException("Could only write $written out of " . strlen($data) . " bytes.");            
+            }
         }
-        protected function write($data) {
-        $written = fwrite($this->socket, $data);
-        if ($written < strlen($data)) {
-          throw new ConnectionException(
-            "Could only write $written out of " . strlen($data) . " bytes."
-          );
-        }
+        return $written;
     }
 
     protected function read($length)

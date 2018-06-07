@@ -89,8 +89,11 @@ class battleStatsClient
     private function send($data)
     {
         if (is_array($data) || is_object($data))
-        {
+        {   $start = time();
+            $this->CLI->cloutf('sending');
             $this->ws->send(json_encode($data), 'hybil10');
+            $time = time()-$start;
+            $this->CLI->clout(' - '.$time.PHP_EOL);
         }
         else
         {
@@ -155,11 +158,9 @@ class battleStatsClient
             $this->geoTime = $geoNow;
 
             $this->CLI->cls();
-            $this->CLI->clout("Geoscape Active : ".date("H:i:s").PHP_EOL);
+            $this->CLI->clout("Geoscape Active");
 
-            $save = new YAML($this->geo);
-            $this->CLI->clout(date("H:i:s"));
-            
+            $save = new YAML($this->geo);            
 
             $transmit['method']       = 'geoscape';
             $transmit['time']         = $battleNow;
@@ -189,6 +190,7 @@ class battleStatsClient
         }
 
         $this->send($transmit);
+        
     }
 
     public function run()

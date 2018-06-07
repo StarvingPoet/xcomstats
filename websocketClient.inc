@@ -22,7 +22,7 @@ class Client extends Base
         // the fragment size
         if (!array_key_exists('fragment_size', $this->options))
         {
-            $this->options['fragment_size'] = 4096;
+            $this->options['fragment_size'] = 65536;
         }
         $this->socket_uri = $uri;
     }
