@@ -79,6 +79,7 @@ class CLI {
             $this->multiline = 0;
             fwrite($this->stdout, $echo);
         }
+        @ob_flush();
     }
 
     /**
