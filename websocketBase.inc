@@ -325,10 +325,10 @@ class Base
     
     protected function write($data) {
         
-        //$written = fwrite($this->socket, $data);
+        //$written = fwrite($this->socket, $data); 
+        /** Moved from fwrite to stream_socket_sendto because fwrite was taking 30+ seconds per MB **/
         for ($written = 0; $written < strlen($data); $written += $fwrite) {
             $fwrite = stream_socket_sendto($this->socket, $data);
-
             if ($fwrite === false){
                 throw new ConnectionException("Could only write $written out of " . strlen($data) . " bytes.");            
             }

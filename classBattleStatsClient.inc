@@ -86,17 +86,12 @@ class battleStatsClient
     /**
      * We have to send arrays in single chunks using hybil 10, otherwise we can send in plain text
      */
-    private function send($data)
-    {
-        if (is_array($data) || is_object($data))
-        {   $start = time();
+    private function send($data) {
+        if (is_array($data) || is_object($data)) {       
             $this->CLI->cloutf('sending');
-            $this->ws->send(json_encode($data), 'hybil10');
-            $time = time()-$start;
-            $this->CLI->clout(' - '.$time.PHP_EOL);
+            $this->ws->send(json_encode($data), 'hybil10');            
         }
-        else
-        {
+        else {
             $this->ws->send($data);
         }
     }
@@ -210,7 +205,18 @@ class battleStatsClient
 
     private function checkForInput()
     {
-        $this->CLI->clout('Check'.PHP_EOL);
+        $saves = new MyDirectory($this->saves, false);
+        foreach ($saves->Contents AS $file) {            
+            if (stripos($file['name'], 'clone') !== false) {
+                echo 'time to clone';
+                exit;
+            }
+            else if (stripos($file['name'], 'resupply') !== false) {           
+                echo 'resupply time';
+                exit;                
+            }
+        }        
+        $this->CLI->clout(' Check'.PHP_EOL);
     }
 }
 ?>

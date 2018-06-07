@@ -6,6 +6,7 @@
 require_once('classCLI.inc');
 require_once('classBattleStatsClient.inc');
 require_once('classYML.inc');
+require_once('classMyDirectory.inc');
 
 require_once('websocketBase.inc');
 require_once('websocketClient.inc');
@@ -19,14 +20,14 @@ $options = array();
  ************************************************/
 
 /** use forward slashes instead of backslashes, leave trailing slash in place **/
-$root     = 'E:/Games/OpenXcom - Extended/';
-$user     = 'user/.XCF/';
-$saves    = 'xcom1/';
+$root     = 'E:/Games/OpenXcom - Extended/';    //Base oxc install - this is where the 'standard' folder is
+$user     = 'user/.XCF/';                       //User Folder - where mods and save folders are    
+$saves    = 'xcom1/';                           //Save Folder
 
 /** The following is for making your BattleStats visible online **/
-$options['broadcast']   = true;                                          // true or false - if true, supply below
-$options['displayName'] = "Starving Poet";                              // What's your handle?
-$options['passKey']     = "containslowcommandrealityresearch";          // Just pick a couple random words, not cryptographically secure - DONT USE A PASSWORD
+$options['broadcast']   = true;                                     // true or false - if true, supply below
+$options['displayName'] = "Display Name";                           // What's your handle?
+$options['passKey']     = "justputawholebunchofrandomwordshere";    // Just pick a couple random words, not cryptographically secure - DONT USE A PASSWORD
 try
 {
     $client = new battleStatsClient($root, $user, $saves, $options);
