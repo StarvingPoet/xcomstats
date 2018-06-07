@@ -14,6 +14,7 @@ class battleStatsClient
     var $battleTime = 0;
     var $timer      = 0;
     var $alive      = false;
+    var $oxc;
 
 	function __construct($root, $user, $saves, $options = array())
 	{
@@ -208,7 +209,7 @@ class battleStatsClient
         $saves = new MyDirectory($this->saves, false);
         foreach ($saves->Contents AS $file) {            
             if (stripos($file['name'], 'clone') !== false) {
-                echo 'time to clone';
+                $retun = $this->cloneSoldiers($file);
                 exit;
             }
             else if (stripos($file['name'], 'resupply') !== false) {           
@@ -218,5 +219,23 @@ class battleStatsClient
         }        
         $this->CLI->clout(' Check'.PHP_EOL);
     }
+    
+    private function loadOXC() {
+        if (!is_object($this->oxc)) {        
+            $this->oxc = new OXC($this->root.$this->user.'mods');
+        }
+        
+    }
+    
+    private function cloneSoldiers($file) {
+        if (!is_object($file))
+        {
+            return false;
+        }
+        
+        ) 
+        
+    }
+    
 }
 ?>
