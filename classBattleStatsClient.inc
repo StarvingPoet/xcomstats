@@ -155,9 +155,11 @@ class battleStatsClient
             $this->geoTime = $geoNow;
 
             $this->CLI->cls();
-            $this->CLI->clout("Geoscape Active");
+            $this->CLI->clout("Geoscape Active : ".date("H:i:s").PHP_EOL);
 
             $save = new YAML($this->geo);
+            $this->CLI->clout(date("H:i:s"));
+            
 
             $transmit['method']       = 'geoscape';
             $transmit['time']         = $battleNow;
