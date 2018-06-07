@@ -31,7 +31,6 @@ class ws
         }
 
 		fwrite($this->instance, $this->hybi10Encode($method));
-        //return $this->listen();
 	}
 
     public function listen()
