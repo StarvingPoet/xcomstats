@@ -7,6 +7,7 @@ class battleStatsClient
     //var $factions = array('X-COM', 'Aliens', 'Civilians');
     var $factions = array('Operatives', 'Opposition', 'Civilians');
 
+    var $saves = '';
     var $geo    = '';
     var $battle = '';
     var $geoTime    = 0;
@@ -22,9 +23,8 @@ class battleStatsClient
         }
         $this->CLI = new CLI("Battle Stats Save Game Client", 80, 25);
 
-        file_put_contents('temp.log', '');
-
 		/** User Config - End **/
+        $this->saves  = $root.$user.$saves;
 		$this->geo    = $root.$user.$saves.'_autogeo_.asav';
 		$this->battle = $root.$user.$saves.'_autobattle_.asav';
 
@@ -39,7 +39,7 @@ class battleStatsClient
 		}
 
         /** Connect to ws server **/
-        $this->ws = new Client('ws://www.starvingpoet.net:9000', array('timeout'=>30));
+        $this->ws = new Client('ws://www.openpaedia.com:9000', array('timeout'=>30));
 
 
         /** login **/
@@ -60,8 +60,6 @@ class battleStatsClient
         if ($this->ws->listen() > 0)
         {
             $data = $this->ws->receive();
-            file_put_contents('temp.log', $data.PHP_EOL, FILE_APPEND);
-
             $this->process($data);
         }
         else
@@ -115,11 +113,6 @@ class battleStatsClient
             {
                 $this->alive = true;
             }
-            else
-            {
-                print_r($result);
-                sleep(10);
-            }
         }
         else if ($data == 'cls')
         {
@@ -152,6 +145,11 @@ class battleStatsClient
         {
             if ($geoNow <= $this->geoTime)
             {
+                /** Every 3 seconds when idle, check to see if we need to clone **/
+                if (time() % 3 == 0)
+                {
+                    $this->checkForInput();
+                }
                 return true;
             }
             $this->geoTime = $geoNow;
@@ -204,6 +202,11 @@ class battleStatsClient
                 $this->tick();
             }
         }
+    }
+
+    private function checkForInput()
+    {
+        $this->CLI->clout('Check'.PHP_EOL);
     }
 }
 ?>
