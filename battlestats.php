@@ -11,6 +11,6 @@ try
 }
 catch (Exception $e)
 {
-    file_put_contents('error.log', print_r($e,true));
+    file_put_contents($GLOBALS['global']['logPath'].'error.log', print_r($e,true));
 }
 ?>

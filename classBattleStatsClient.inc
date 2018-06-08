@@ -22,7 +22,7 @@ class battleStatsClient
         {
             $options['broadcast'] = false;
         }
-        $this->CLI = new CLI("Battle Stats Save Game Client", 80, 25);
+        $this->CLI = new CLI("Battle Stats Save Game Client", 80, 80);
 
 		/** User Config - End **/
         $this->root   = $root;
@@ -81,8 +81,7 @@ class battleStatsClient
             else
             {
                 $this->timer = 0;
-            }
-            sleep(1);
+            }            
         }
     }
 
@@ -91,7 +90,7 @@ class battleStatsClient
      */
     private function send($data) {
         if (is_array($data) || is_object($data)) {       
-            $this->CLI->cloutf('sending');
+            //$this->CLI->cloutf('sending');
             $this->ws->send(json_encode($data), 'hybil10');            
         }
         else {
@@ -144,8 +143,7 @@ class battleStatsClient
 
         if ($geoNow > $battleNow)
         {
-            if ($geoNow <= $this->geoTime)
-            {
+            if ($geoNow <= $this->geoTime) {
                 /** Every 3 seconds when idle, check to see if we need to clone **/
                 if (time() % 3 == 0)
                 {
@@ -156,9 +154,25 @@ class battleStatsClient
             $this->geoTime = $geoNow;
 
             $this->CLI->cls();
-            $this->CLI->clout("Geoscape Active");
+            $this->CLI->clout("Geoscape Active".PHP_EOL);
 
-            $save = new YAML($this->geo);            
+            $save = new YAML($this->geo);      
+
+            /** prune data **/            
+            foreach ($save->YAMLArray[1]['bases'] as $key=>$base) {
+                foreach ($base AS $key2=>$data) {
+                    if ($key2 != 'soldiers')
+                    {
+                        unset($save->YAMLArray[1]['bases'][$key][$key2]);
+                    }
+                }
+            }                     
+            foreach ($save->YAMLArray[1]['deadSoldiers'] as $key=>$soldier)
+            {
+                if (stripos($soldier['name'], '..') !== false) {
+                    unset($save->YAMLArray[1]['deadSoldiers'][$key]);
+                }                
+            }           
 
             $transmit['method']       = 'geoscape';
             $transmit['time']         = $battleNow;
@@ -167,8 +181,7 @@ class battleStatsClient
         }
         else
         {
-            if ($battleNow <= $this->battleTime)
-            {
+            if ($battleNow <= $this->battleTime) {
                 return true;
             }
             $this->battleTime = $battleNow;
@@ -178,7 +191,7 @@ class battleStatsClient
 
             $save = new YAML($this->battle);
 
-            file_put_contents('debug.txt', print_r($save,true));
+            //file_put_contents($GLOBALS['global']['logPath'].'debug.txt', print_r($save,true));
 
 
             $transmit['method']     = 'battlescape';
@@ -188,6 +201,8 @@ class battleStatsClient
         }
 
         $this->send($transmit);
+        unset($save);
+        unset($transmit);
         
     }
 
@@ -195,6 +210,7 @@ class battleStatsClient
     {
         while (true)
         {
+            sleep(1);
             /** Look for incoming data**/
             $this->listen();
 
@@ -210,15 +226,15 @@ class battleStatsClient
     {
         $saves = new MyDirectory($this->saves, false);
         foreach ($saves->Contents AS $file) {            
-            if (stripos($file['name'], 'clone') !== false) {
-                $retun = $this->cloneSoldiers($file);                  
+            if (stripos($file['name'], 'clone') !== false && $file['ext'] == 'sav') {
+                $return = $this->cloneSoldiers($file);                  
             }
             else if (stripos($file['name'], 'resupply') !== false) {           
                 echo 'resupply time';
                 exit;                
             }
         }        
-        $this->CLI->clout(' Check'.PHP_EOL);
+        //$this->CLI->clout(' Check'.PHP_EOL);
     }
     
     private function loadOXC() {
@@ -232,9 +248,8 @@ class battleStatsClient
         if (!is_array($file)) {
             return false;
         }
-        $this->loadOXC();
-        
-        print_r($file);       
+        $this->loadOXC();        
+            
         $base  = $soldier = 0;
         $clean = trim(str_ireplace('clone' ,'', $file['name']));
         
@@ -252,11 +267,17 @@ class battleStatsClient
         /** Do the thing **/
         $this->oxc->loadSave($file['name'], $this->saves);
         
-        $returned = $this->oxc->cloneSoldiers($soldier, $base);        
+        $returned = $this->oxc->cloneSoldiers($soldier, $base);             
         if ($returned !== false) {
             $this->oxc->saveAs('New Soldiers Available', $this->saves);
             if (is_file($file['fullPath'])) {
                 unlink($file['fullPath']);
+            }
+            if (is_array($returned)) {
+                $json = array();
+                $json['method'] = 'newSoldiers';
+                $json['info']   = $returned;
+                $this->send($json);                
             }
         }
         
