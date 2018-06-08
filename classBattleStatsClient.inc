@@ -25,6 +25,8 @@ class battleStatsClient
         $this->CLI = new CLI("Battle Stats Save Game Client", 80, 25);
 
 		/** User Config - End **/
+        $this->root   = $root;
+        $this->mods   = $root.$user.'mods';
         $this->saves  = $root.$user.$saves;
 		$this->geo    = $root.$user.$saves.'_autogeo_.asav';
 		$this->battle = $root.$user.$saves.'_autobattle_.asav';
@@ -209,8 +211,7 @@ class battleStatsClient
         $saves = new MyDirectory($this->saves, false);
         foreach ($saves->Contents AS $file) {            
             if (stripos($file['name'], 'clone') !== false) {
-                $retun = $this->cloneSoldiers($file);
-                exit;
+                $retun = $this->cloneSoldiers($file);                  
             }
             else if (stripos($file['name'], 'resupply') !== false) {           
                 echo 'resupply time';
@@ -222,15 +223,43 @@ class battleStatsClient
     
     private function loadOXC() {
         if (!is_object($this->oxc)) {        
-            $this->oxc = new OXC($this->root.$this->user.'mods');
-        }
-        
+            $this->oxc = new OXC($this->mods);
+            $this->oxc->collectMods($this->root.'standard');
+        }        
     }
     
     private function cloneSoldiers($file) {
-        if (!is_object($file)) {
+        if (!is_array($file)) {
             return false;
-        }            
+        }
+        $this->loadOXC();
+        
+        print_r($file);       
+        $base  = $soldier = 0;
+        $clean = trim(str_ireplace('clone' ,'', $file['name']));
+        
+        /** grab the variables sent in the save **/        
+        if (preg_match('/(base=\d).*(soldier=\d)/', $file['name'], $ret) == false) {
+            $this->CLI->clerr('Clone file name syntax incorrect: clone base=x soldier=x');
+        }        
+        
+        for ($i=1; $i <= 2; $i++)
+        {            
+            $temp = explode('=', $ret[$i]);            
+            ${$temp[0]} = $temp[1];            
+        }
+        
+        /** Do the thing **/
+        $this->oxc->loadSave($file['name'], $this->saves);
+        
+        $returned = $this->oxc->cloneSoldiers($soldier, $base);        
+        if ($returned !== false) {
+            $this->oxc->saveAs('New Soldiers Available', $this->saves);
+            if (is_file($file['fullPath'])) {
+                unlink($file['fullPath']);
+            }
+        }
+        
     }
     
 }
