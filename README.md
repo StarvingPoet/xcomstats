@@ -9,7 +9,7 @@ Once the above is installed and the YAML extension is enabled in php.ini, extrac
 
 From the command-line simple type "(pathtophp)php battlestats.php" or edit the included .bat file.
 
-All user defined variables are in battlestats.php:
+All user defined variables are in userVariables.php:
 
   *  root     = 'E:/Games/OpenXcom - Extended/';  //base xcom install
   *  $user     = 'user/.XCF/';                    //user folder (where the mod and save directories are)
