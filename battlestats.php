@@ -1,6 +1,7 @@
 <?PHP
 
 require_once('library/include.inc');
+require_once('classBattleStatsClient.inc');
 include('userVariables.php');
 
 try

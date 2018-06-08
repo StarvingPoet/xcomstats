@@ -228,13 +228,9 @@ class battleStatsClient
     }
     
     private function cloneSoldiers($file) {
-        if (!is_object($file))
-        {
+        if (!is_object($file)) {
             return false;
-        }
-        
-        ) 
-        
+        }            
     }
     
 }
