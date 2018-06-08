@@ -67,6 +67,7 @@ class battleStatsClient
         }
         else
         {
+            sleep(1);
             /** Pretty little sleep nugget **/
             $str = str_repeat('.', $this->timer);
             if ($this->timer == 0)
@@ -143,12 +144,8 @@ class battleStatsClient
 
         if ($geoNow > $battleNow)
         {
-            if ($geoNow <= $this->geoTime) {
-                /** Every 3 seconds when idle, check to see if we need to clone **/
-                if (time() % 3 == 0)
-                {
-                    $this->checkForInput();
-                }
+            if ($geoNow <= $this->geoTime) {                
+                $this->checkForInput();                
                 return true;
             }
             $this->geoTime = $geoNow;
@@ -209,8 +206,7 @@ class battleStatsClient
     public function run()
     {
         while (true)
-        {
-            sleep(1);
+        {            
             /** Look for incoming data**/
             $this->listen();
 
