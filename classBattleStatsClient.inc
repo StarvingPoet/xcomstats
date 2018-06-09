@@ -144,8 +144,12 @@ class battleStatsClient
 
         if ($geoNow > $battleNow)
         {
-            if ($geoNow <= $this->geoTime) {                
-                $this->checkForInput();                
+            if ($geoNow <= $this->geoTime) {       
+                if($this->timer == 2)
+                {
+                    $this->CLI->clerr('check');
+                    $this->checkForInput();                
+                }                
                 return true;
             }
             $this->geoTime = $geoNow;
@@ -221,8 +225,9 @@ class battleStatsClient
     private function checkForInput()
     {
         $saves = new MyDirectory($this->saves, false);
-        foreach ($saves->Contents AS $file) {            
+        foreach ($saves->Contents AS $file) {                  
             if (stripos($file['name'], 'clone') !== false && $file['ext'] == 'sav') {
+                sleep(2);
                 $return = $this->cloneSoldiers($file);                  
             }
             else if (stripos($file['name'], 'resupply') !== false) {           
@@ -241,24 +246,43 @@ class battleStatsClient
     }
     
     private function cloneSoldiers($file) {
+        echo PHP_EOL;
+        ob_flush(); 
+        $error = true;
+        
         if (!is_array($file)) {
             return false;
-        }
+        }        
         $this->loadOXC();        
             
         $base  = $soldier = 0;
-        $clean = trim(str_ireplace('clone' ,'', $file['name']));
+        $clean = trim(str_ireplace('clone' ,'', str_ireplace('.'.$file['ext'], '', $file['name'])));        
+        $parts = explode(' ', $clean);        
+        print_r($parts);        
         
-        /** grab the variables sent in the save **/        
-        if (preg_match('/(base=\d).*(soldier=\d)/', $file['name'], $ret) == false) {
-            $this->CLI->clerr('Clone file name syntax incorrect: clone base=x soldier=x');
+        if (is_array($parts)) {
+            $error = false;
+            
+            foreach ($parts as $variable) {
+                $temp       = explode('=', $variable);            
+                $temp[0]    = strtolower($temp[0]);
+                ${$temp[0]} = $temp[1];            
+            }
         }        
         
-        for ($i=1; $i <= 2; $i++)
-        {            
-            $temp = explode('=', $ret[$i]);            
-            ${$temp[0]} = $temp[1];            
+        $this->CLI->clout('base: '. $base.PHP_EOL.'Soldiers: '.$soldier.PHP_EOL);
+        
+        
+        if (!is_array($parts) || $error  || $base==0) {
+            $this->CLI->clerr('Clone file name syntax incorrect: clone base=x soldier=x');
+            $this->CLI->clerr('Unable to parse '.$file['name']);
+            return false;            
         }
+        
+        /** grab the variables sent in the save **      
+        /if (preg_match('/(base=\d).*(soldier=\d)/', $file['name'], $ret) == false) {
+
+        }   */                
         
         /** Do the thing **/
         $this->oxc->loadSave($file['name'], $this->saves);
@@ -269,14 +293,24 @@ class battleStatsClient
             if (is_file($file['fullPath'])) {
                 unlink($file['fullPath']);
             }
-            if (is_array($returned)) {
+            if ($returned != false) {
                 $json = array();
                 $json['method'] = 'newSoldiers';
                 $json['info']   = $returned;
                 $this->send($json);                
             }
+            /** Short sleep - prevents problems with backup saves **/
+            sleep(1);
         }
         
+    }
+    
+    private function resupply($file) {
+        if (!is_array($file)) {
+            return false;
+        }
+        
+        $this->loadOXC(); 
     }
     
 }
