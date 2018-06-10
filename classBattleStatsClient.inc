@@ -224,16 +224,22 @@ class battleStatsClient
 
     private function checkForInput()
     {
-        $saves = new MyDirectory($this->saves, false);
+        $saves = new MyDirectory($this->saves, false);        
+        $return = false;
         foreach ($saves->Contents AS $file) {                  
             if (stripos($file['name'], 'clone') !== false && $file['ext'] == 'sav') {
-                sleep(2);
+                $this->CLI->clout('found');
+                sleep(3); //after finding the file we need to sleep to prevent locking 
+                $this->CLI->clout('processing');
                 $return = $this->cloneSoldiers($file);                  
+                break;
             }
-            else if (stripos($file['name'], 'resupply') !== false) {           
-                echo 'resupply time';
-                exit;                
+            else if (stripos($file['name'], 'resupply') !== false && $file['ext'] == 'sav') {           
+                sleep(3);
+                $return = $this->resupply($file);
+                break;               
             }
+            
         }        
         //$this->CLI->clout(' Check'.PHP_EOL);
     }
@@ -245,21 +251,18 @@ class battleStatsClient
         }        
     }
     
-    private function cloneSoldiers($file) {
-        echo PHP_EOL;
-        ob_flush(); 
+    private function cloneSoldiers($file) {        
         $error = true;
         
         if (!is_array($file)) {
+            $this->CLI->clerr('Incorrect $file format');
             return false;
         }        
         $this->loadOXC();        
             
         $base  = $soldier = 0;
         $clean = trim(str_ireplace('clone' ,'', str_ireplace('.'.$file['ext'], '', $file['name'])));        
-        $parts = explode(' ', $clean);        
-        print_r($parts);        
-        
+        $parts = explode(' ', $clean);                
         if (is_array($parts)) {
             $error = false;
             
@@ -277,12 +280,7 @@ class battleStatsClient
             $this->CLI->clerr('Clone file name syntax incorrect: clone base=x soldier=x');
             $this->CLI->clerr('Unable to parse '.$file['name']);
             return false;            
-        }
-        
-        /** grab the variables sent in the save **      
-        /if (preg_match('/(base=\d).*(soldier=\d)/', $file['name'], $ret) == false) {
-
-        }   */                
+        }         
         
         /** Do the thing **/
         $this->oxc->loadSave($file['name'], $this->saves);
@@ -291,6 +289,7 @@ class battleStatsClient
         if ($returned !== false) {
             $this->oxc->saveAs('New Soldiers Available', $this->saves);
             if (is_file($file['fullPath'])) {
+                sleep(2);                
                 unlink($file['fullPath']);
             }
             if ($returned != false) {
@@ -298,9 +297,9 @@ class battleStatsClient
                 $json['method'] = 'newSoldiers';
                 $json['info']   = $returned;
                 $this->send($json);                
-            }
-            /** Short sleep - prevents problems with backup saves **/
-            sleep(1);
+            }           
+            
+            return true;
         }
         
     }
@@ -311,6 +310,26 @@ class battleStatsClient
         }
         
         $this->loadOXC(); 
+        
+        $template = 0;
+        $clean = trim(str_ireplace('resupply' ,'', str_ireplace('.'.$file['ext'], '', $file['name'])));        
+        $clean = intval($clean, 10);
+                
+        $this->CLI->clout('Template: '. $clean);
+        
+        /** Do the thing **/
+        $this->oxc->loadSave($file['name'], $this->saves);
+        
+        $returned = $this->oxc->resupplyBases($clean);             
+        if ($returned !== false) {
+            $this->oxc->saveAs('Logistics Finished', $this->saves);
+            if (is_file($file['fullPath'])) {
+                sleep(2);                
+                unlink($file['fullPath']);
+            }            
+            return true;
+        }
+        
     }
     
 }
