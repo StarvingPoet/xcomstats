@@ -145,9 +145,8 @@ class battleStatsClient
         if ($geoNow > $battleNow)
         {
             if ($geoNow <= $this->geoTime) {       
-                if($this->timer == 2)
-                {
-                    $this->CLI->clerr('check');
+                if($this->timer == 0) /** once every four seconds, check for save **/
+                {                    
                     $this->checkForInput();                
                 }                
                 return true;
@@ -273,8 +272,7 @@ class battleStatsClient
             }
         }        
         
-        $this->CLI->clout('base: '. $base.PHP_EOL.'Soldiers: '.$soldier.PHP_EOL);
-        
+        //$this->CLI->clout('base: '. $base.PHP_EOL.'Soldiers: '.$soldier.PHP_EOL);        
         
         if (!is_array($parts) || $error  || $base==0) {
             $this->CLI->clerr('Clone file name syntax incorrect: clone base=x soldier=x');
@@ -297,8 +295,7 @@ class battleStatsClient
                 $json['method'] = 'newSoldiers';
                 $json['info']   = $returned;
                 $this->send($json);                
-            }           
-            
+            }                       
             return true;
         }
         
@@ -315,7 +312,7 @@ class battleStatsClient
         $clean = trim(str_ireplace('resupply' ,'', str_ireplace('.'.$file['ext'], '', $file['name'])));        
         $clean = intval($clean, 10);
                 
-        $this->CLI->clout('Template: '. $clean);
+        //$this->CLI->clout('Template: '. $clean);
         
         /** Do the thing **/
         $this->oxc->loadSave($file['name'], $this->saves);
