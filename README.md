@@ -15,8 +15,8 @@ All user defined variables are in userVariables.php:
 
 ```php
   $root     = 'E:/Games/OpenXcom - Extended/';  //base xcom install
-  $user     = 'user/.XCF/';                    //user folder (where the mod and save directories are)
-  $saves    = 'xcom1/';                        //save folder 
+  $user     = 'user/.XCF/';                     //user folder (where the mod and save directories are) 
+  $saves    = 'xcom1/';                         //save folder 
 
   /** The following is for making your BattleStats visible online **/
   $options['broadcast']   = true;                 // true or false - if true, supply below
