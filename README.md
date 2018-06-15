@@ -1,4 +1,4 @@
-##Installation Instructions
+## Installation Instructions
 
 **The XCOM Battlestat Client requires installation of PHP 7.2+ to be installed with the PECL YAML extension.**
 
@@ -14,7 +14,7 @@ From the command-line simple type "(pathtophp)php battlestats.php"
 All user defined variables are in userVariables.php:
 
 ```php
-  root     = 'E:/Games/OpenXcom - Extended/';  //base xcom install
+  $root     = 'E:/Games/OpenXcom - Extended/';  //base xcom install
   $user     = 'user/.XCF/';                    //user folder (where the mod and save directories are)
   $saves    = 'xcom1/';                        //save folder 
 
@@ -24,5 +24,5 @@ All user defined variables are in userVariables.php:
   $options['passKey']     = "RandomWordsGoHere";  // Just pick a couple random words, not cryptographically secure - DONT USE A PASSWORD
 ```
 
-Your overlay will be visible at http://www.openpaedia.com/xcomstats_overlay
+If broadcast is true, Your overlay will be visible at http://www.openpaedia.com/xcomstats_overlay
 type 'list' to find a link to your unique url.
