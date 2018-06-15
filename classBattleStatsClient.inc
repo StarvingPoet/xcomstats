@@ -226,10 +226,8 @@ class battleStatsClient
         $saves = new MyDirectory($this->saves, false);        
         $return = false;
         foreach ($saves->Contents AS $file) {                  
-            if (stripos($file['name'], 'clone') !== false && $file['ext'] == 'sav') {
-                $this->CLI->clout('found');
-                sleep(3); //after finding the file we need to sleep to prevent locking 
-                $this->CLI->clout('processing');
+            if (stripos($file['name'], 'clone') !== false && $file['ext'] == 'sav') {                
+                sleep(3); //after finding the file we need to sleep to prevent locking                 
                 $return = $this->cloneSoldiers($file);                  
                 break;
             }
