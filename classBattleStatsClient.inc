@@ -22,7 +22,7 @@ class battleStatsClient
         {
             $options['broadcast'] = false;
         }
-        $this->CLI = new CLI("Battle Stats Save Game Client", 80, 80);
+        $this->CLI = new CLI("Battle Stats Save Game Client", 80, 24);
 
 		/** User Config - End **/
         $this->root   = $root;
