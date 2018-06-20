@@ -29,12 +29,14 @@ If broadcast is true, Your overlay will be visible at http://www.openpaedia.com/
 type 'list' to find a link to your unique url.
 
 ### Clone and Resupply Functions
+  * These functions require internet connectivity to work, sorry.
 
 ## Cloning Soldiers:
 
 save name syntax: `clone soldier=x base=y`
 
 `soldier` is the number of soldiers you want to clone
+
 `base` is the number of bases to distribute soldiers across.  `base=3` means the first three bases.
 
 The clone soldier function will replace named soldiers and increment their death counts as needed.  It will transfer the diaries over to the new soldiers as well as any nationality / look variant / gender / etc.  It will strip the diaries from dead soldiers, to save on save game space and prefix their name with `..` in the memorial so you can keep track of which soldiers are without clones.  You must have the default names set for this to work.
@@ -46,6 +48,7 @@ Soldiers will be 'balanced' across the number of bases you select.  Soldiers wil
 save name syntax `resupply temp=x base=y`
 
 `temp` is the ship loadout template you want to fulfill.  You can distribute armor by manually adding armor to the loadout via save editing.
+
 `base` are the bases you want to distribute across.
   * base=2 means supply the first two bases
   * base=3-5 means supply base 3 through 5
