@@ -266,9 +266,20 @@ class battleStatsClient
             $temp               = explode('=', $variable);
             $temp[0]            = strtolower($temp[0]);
 
-            if (strpos($temp[1], ',') !== false) /** if variable is comma delimited, explode it as well. **/ {
+            if (strpos($temp[1], ',') !== false) {/** if variable is comma delimited, explode it as well. **/
                 $temp[1] = explode(',', $temp[1]);
             }
+            else if (strpos($temp[1], '-') !== false) { /** if variable is a range (x-y), build the array between and including those numbers **/
+                $range = explode('-', $temp[1]);
+                $temp[1] = array();
+                for ($i = $range[0]; $i <= $range[1]; $i++)
+                {
+                    $temp[1][] = $i;
+                }
+            }
+
+            print_r($temp);
+            exit();
             $return[$temp[0]] = $temp[1];
         }
 
