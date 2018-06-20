@@ -82,7 +82,7 @@ class battleStatsClient
             else
             {
                 $this->timer = 0;
-            }            
+            }
         }
     }
 
@@ -90,9 +90,9 @@ class battleStatsClient
      * We have to send arrays in single chunks using hybil 10, otherwise we can send in plain text
      */
     private function send($data) {
-        if (is_array($data) || is_object($data)) {       
+        if (is_array($data) || is_object($data)) {
             //$this->CLI->cloutf('sending');
-            $this->ws->send(json_encode($data), 'hybil10');            
+            $this->ws->send(json_encode($data), 'hybil10');
         }
         else {
             $this->ws->send($data);
@@ -144,11 +144,11 @@ class battleStatsClient
 
         if ($geoNow > $battleNow)
         {
-            if ($geoNow <= $this->geoTime) {       
+            if ($geoNow <= $this->geoTime) {
                 if($this->timer == 0) /** once every four seconds, check for save **/
-                {                    
-                    $this->checkForInput();                
-                }                
+                {
+                    $this->checkForInput();
+                }
                 return true;
             }
             $this->geoTime = $geoNow;
@@ -156,9 +156,9 @@ class battleStatsClient
             $this->CLI->cls();
             $this->CLI->clout("Geoscape Active".PHP_EOL);
 
-            $save = new YAML($this->geo);      
+            $save = new YAML($this->geo);
 
-            /** prune data **/            
+            /** prune data **/
             foreach ($save->YAMLArray[1]['bases'] as $key=>$base) {
                 foreach ($base AS $key2=>$data) {
                     if ($key2 != 'soldiers')
@@ -166,13 +166,13 @@ class battleStatsClient
                         unset($save->YAMLArray[1]['bases'][$key][$key2]);
                     }
                 }
-            }                     
+            }
             foreach ($save->YAMLArray[1]['deadSoldiers'] as $key=>$soldier)
             {
                 if (stripos($soldier['name'], '..') !== false) {
                     unset($save->YAMLArray[1]['deadSoldiers'][$key]);
-                }                
-            }           
+                }
+            }
 
             $transmit['method']       = 'geoscape';
             $transmit['time']         = $battleNow;
@@ -203,13 +203,13 @@ class battleStatsClient
         $this->send($transmit);
         unset($save);
         unset($transmit);
-        
+
     }
 
     public function run()
     {
         while (true)
-        {            
+        {
             /** Look for incoming data**/
             $this->listen();
 
@@ -223,109 +223,144 @@ class battleStatsClient
 
     private function checkForInput()
     {
-        $saves = new MyDirectory($this->saves, false);        
+        $saves = new MyDirectory($this->saves, false);
         $return = false;
-        foreach ($saves->Contents AS $file) {                  
-            if (stripos($file['name'], 'clone') !== false && $file['ext'] == 'sav') {                
-                sleep(3); //after finding the file we need to sleep to prevent locking                 
-                $return = $this->cloneSoldiers($file);                  
+        foreach ($saves->Contents AS $file) {
+            if (stripos($file['name'], 'clone') !== false && $file['ext'] == 'sav') {
+                sleep(3); //after finding the file we need to sleep to prevent locking
+                $return = $this->cloneSoldiers($file);
                 break;
             }
-            else if (stripos($file['name'], 'resupply') !== false && $file['ext'] == 'sav') {           
+            else if (stripos($file['name'], 'resupply') !== false && $file['ext'] == 'sav') {
                 sleep(3);
                 $return = $this->resupply($file);
-                break;               
+                break;
             }
-            
-        }        
+
+        }
         //$this->CLI->clout(' Check'.PHP_EOL);
     }
-    
+
+    /** returns an array of variables from the file name **/
+    private function getVariables($file) {
+        $return    = array();
+        $clean     = trim(str_ireplace('.'.$file['ext'], '', $file['name']));         /** strip off extension **/
+
+
+        /** explode on spaces **/
+        $parts = explode(' ', $clean);
+
+        if (!is_array($parts)) {
+            $this->CLI->clerr('File Naming Error:  `Clone/Resupply $var1 $var2`');
+            return false;
+        }
+        if (strtolower($parts[0]) != 'clone' && strtolower($parts[0]) != 'resupply') {
+            $this->CLI->clerr('File Naming Error:  `Clone or Resupply are the only supported commands`');
+            return false;
+
+        }
+        foreach($parts AS $variable) {
+            if (stripos($variable, '=') === false) {  /** skip the first / command variable **/
+                continue;
+            }
+            $temp               = explode('=', $variable);
+            $temp[0]            = strtolower($temp[0]);
+
+            if (strpos($temp[1], ',') !== false) /** if variable is comma delimited, explode it as well. **/ {
+                $temp[1] = explode(',', $temp[1]);
+            }
+            $return[$temp[0]] = $temp[1];
+        }
+
+        if (empty($return))
+        {
+            $return = false;
+        }
+
+        return $return;
+    }
+
     private function loadOXC() {
-        if (!is_object($this->oxc)) {        
+        if (!is_object($this->oxc)) {
             $this->oxc = new OXC($this->mods);
             $this->oxc->collectMods($this->root.'standard');
-        }        
+        }
     }
-    
-    private function cloneSoldiers($file) {        
+
+    private function cloneSoldiers($file) {
         $error = true;
-        
+
         if (!is_array($file)) {
             $this->CLI->clerr('Incorrect $file format');
             return false;
-        }        
-        $this->loadOXC();        
-            
-        $base  = $soldier = 0;
-        $clean = trim(str_ireplace('clone' ,'', str_ireplace('.'.$file['ext'], '', $file['name'])));        
-        $parts = explode(' ', $clean);                
-        if (is_array($parts)) {
-            $error = false;
-            
-            foreach ($parts as $variable) {
-                $temp       = explode('=', $variable);            
-                $temp[0]    = strtolower($temp[0]);
-                ${$temp[0]} = $temp[1];            
-            }
-        }        
-        
-        //$this->CLI->clout('base: '. $base.PHP_EOL.'Soldiers: '.$soldier.PHP_EOL);        
-        
-        if (!is_array($parts) || $error  || $base==0) {
+        }
+        $this->loadOXC();
+
+        $variables = $this->getVariables($file);
+
+        if (!$variables) {
             $this->CLI->clerr('Clone file name syntax incorrect: clone base=x soldier=x');
             $this->CLI->clerr('Unable to parse '.$file['name']);
-            return false;            
-        }         
-        
+            return false;
+        }
+
         /** Do the thing **/
         $this->oxc->loadSave($file['name'], $this->saves);
-        
-        $returned = $this->oxc->cloneSoldiers($soldier, $base);             
+
+        $returned = $this->oxc->cloneSoldiers($variables['soldier'], $variables['base']);
         if ($returned !== false) {
             $this->oxc->saveAs('New Soldiers Available', $this->saves);
             if (is_file($file['fullPath'])) {
-                sleep(2);                
+                sleep(2);
                 unlink($file['fullPath']);
             }
             if ($returned != false) {
                 $json = array();
                 $json['method'] = 'newSoldiers';
                 $json['info']   = $returned;
-                $this->send($json);                
-            }                       
+                $this->send($json);
+            }
             return true;
         }
-        
+
     }
-    
+
     private function resupply($file) {
         if (!is_array($file)) {
             return false;
         }
-        
-        $this->loadOXC(); 
-        
+
+        $this->loadOXC();
+
+        /*
         $template = 0;
-        $clean = trim(str_ireplace('resupply' ,'', str_ireplace('.'.$file['ext'], '', $file['name'])));        
-        $clean = intval($clean, 10);
-                
+        $clean = trim(str_ireplace('resupply' ,'', str_ireplace('.'.$file['ext'], '', $file['name'])));
+        $clean = intval($clean, 10);*/
+
+        $variables = $this->getVariables($file);
+
+        if (!$variables) {
+            $this->CLI->clerr('Clone file name syntax incorrect: resupply temp=x (base=x)');
+            $this->CLI->clerr('Unable to parse '.$file['name']);
+            return false;
+        }
+
         //$this->CLI->clout('Template: '. $clean);
-        
+
         /** Do the thing **/
         $this->oxc->loadSave($file['name'], $this->saves);
-        
-        $returned = $this->oxc->resupplyBases($clean);             
+
+        $returned = $this->oxc->resupplyBases(intval($variables['temp'],10), $variables['base']);
         if ($returned !== false) {
             $this->oxc->saveAs('Logistics Finished', $this->saves);
             if (is_file($file['fullPath'])) {
-                sleep(2);                
+                sleep(2);
                 unlink($file['fullPath']);
-            }            
+            }
             return true;
         }
-        
+
     }
-    
+
 }
 ?>
