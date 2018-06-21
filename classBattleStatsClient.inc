@@ -31,6 +31,11 @@ class battleStatsClient
 		$this->geo    = $root.$user.$saves.'_autogeo_.asav';
 		$this->battle = $root.$user.$saves.'_autobattle_.asav';
 
+
+        /** Initialize OXC Class **/
+        $this->loadOXC();
+        $this->oxc->defaultNames = $options['defaultNames'];
+
 		/* Check for Missing Files */
 		if (!is_file($this->geo))
 		{
@@ -268,18 +273,20 @@ class battleStatsClient
 
             if (strpos($temp[1], ',') !== false) {/** if variable is comma delimited, explode it as well. **/
                 $temp[1] = explode(',', $temp[1]);
+                if ($temp[0] == 'base' || $temp[0] == 'temp') { /** these arrays start at 0, but people like to start with 1 **/
+                    foreach ($temp[1] as $tkey => $ti) {
+                        $temp[1][$tkey] = $ti - 1;
+                    }
+                }
             }
             else if (strpos($temp[1], '-') !== false) { /** if variable is a range (x-y), build the array between and including those numbers **/
                 $range = explode('-', $temp[1]);
                 $temp[1] = array();
-                for ($i = $range[0]; $i <= $range[1]; $i++)
+                for ($i = $range[0]-1; $i < $range[1]; $i++)
                 {
                     $temp[1][] = $i;
                 }
             }
-
-            print_r($temp);
-            exit();
             $return[$temp[0]] = $temp[1];
         }
 
