@@ -268,8 +268,8 @@ class battleStatsClient
             if (stripos($variable, '=') === false) {  /** skip the first / command variable **/
                 continue;
             }
-            $temp               = explode('=', $variable);
-            $temp[0]            = strtolower($temp[0]);
+            $temp    = explode('=', $variable);
+            $temp[0] = strtolower($temp[0]);
 
             if (strpos($temp[1], ',') !== false) {/** if variable is comma delimited, explode it as well. **/
                 $temp[1] = explode(',', $temp[1]);
@@ -287,7 +287,7 @@ class battleStatsClient
                     $temp[1][] = $i;
                 }
             }
-            else if ($temp[0] == 'temp') {
+            else if ($temp[0] == 'temp') { /** reindex template as well **/
                 $temp[1] = $temp[1]-1;
             }
             $return[$temp[0]] = $temp[1];
@@ -352,12 +352,6 @@ class battleStatsClient
         }
 
         $this->loadOXC();
-
-        /*
-        $template = 0;
-        $clean = trim(str_ireplace('resupply' ,'', str_ireplace('.'.$file['ext'], '', $file['name'])));
-        $clean = intval($clean, 10);*/
-
         $variables = $this->getVariables($file);
 
         if (!$variables) {
