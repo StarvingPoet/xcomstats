@@ -273,9 +273,9 @@ class battleStatsClient
 
             if (strpos($temp[1], ',') !== false) {/** if variable is comma delimited, explode it as well. **/
                 $temp[1] = explode(',', $temp[1]);
-                if ($temp[0] == 'base' || $temp[0] == 'temp') { /** these arrays start at 0, but people like to start with 1 **/
-                    foreach ($temp[1] as $tkey => $ti) {
-                        $temp[1][$tkey] = $ti - 1;
+                if ($temp[0] == 'base') { /** these arrays start at 0, but people like to start with 1 **/
+                    foreach ($temp[1] as $i) {
+                        $i = $i - 1;
                     }
                 }
             }
@@ -286,6 +286,9 @@ class battleStatsClient
                 {
                     $temp[1][] = $i;
                 }
+            }
+            else if ($temp[0] == 'temp') {
+                $temp[1] = $temp[1]-1;
             }
             $return[$temp[0]] = $temp[1];
         }
