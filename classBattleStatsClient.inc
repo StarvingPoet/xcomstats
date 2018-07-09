@@ -36,6 +36,9 @@ class battleStatsClient
         $this->loadOXC();
         $this->oxc->defaultNames = $options['defaultNames'];
 
+        //$this->oxc->loadSave('_autogeo_.asav', $this->saves);
+        //$this->oxc->fixAmmoManufacturing();
+
 		/* Check for Missing Files */
 		if (!is_file($this->geo))
 		{
@@ -366,6 +369,7 @@ class battleStatsClient
         $this->oxc->loadSave($file['name'], $this->saves);
 
         $returned = $this->oxc->resupplyBases(intval($variables['temp'],10), $variables['base']);
+
         if ($returned !== false) {
             $this->oxc->saveAs('Logistics Finished', $this->saves);
             if (is_file($file['fullPath'])) {
