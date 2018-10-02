@@ -22,7 +22,8 @@ class battleStatsClient
         {
             $options['broadcast'] = false;
         }
-        $this->CLI = new CLI("Battle Stats Save Game Client", 80, 24);
+        //his->CLI = new CLI("Battle Stats Save Game Client", 80, 24);
+        $this->CLI = new CLI("Battle Stats Save Game Client", 80, 80);
 
 		/** User Config - End **/
         $this->root   = $root;
@@ -306,6 +307,7 @@ class battleStatsClient
 
     private function loadOXC() {
         if (!is_object($this->oxc)) {
+
             $this->oxc = new OXC($this->mods);
             $this->oxc->collectMods($this->root.'standard');
         }
@@ -363,7 +365,7 @@ class battleStatsClient
             return false;
         }
 
-        //$this->CLI->clout('Template: '. $clean);
+        $this->CLI->clout(PHP_EOL.'Template: '. $variables['temp']);
 
         /** Do the thing **/
         $this->oxc->loadSave($file['name'], $this->saves);
@@ -372,6 +374,8 @@ class battleStatsClient
 
         if ($returned !== false) {
             $this->oxc->saveAs('Logistics Finished', $this->saves);
+            $this->CLI->clout('file saved');
+
             if (is_file($file['fullPath'])) {
                 sleep(2);
                 unlink($file['fullPath']);
