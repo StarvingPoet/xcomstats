@@ -22,7 +22,7 @@ class battleStatsClient
         {
             $options['broadcast'] = false;
         }
-        //his->CLI = new CLI("Battle Stats Save Game Client", 80, 24);
+        //$this->CLI = new CLI("Battle Stats Save Game Client", 80, 24);
         $this->CLI = new CLI("Battle Stats Save Game Client", 80, 80);
 
 		/** User Config - End **/
@@ -130,7 +130,9 @@ class battleStatsClient
         }
         else /** Catchall - output data **/
         {
-            $this->CLI->clout($data.PHP_EOL);
+			$output = array($data, PHP_EOL);
+            $this->CLI->clout($output);
+
         }
 
     }
@@ -163,7 +165,8 @@ class battleStatsClient
             $this->geoTime = $geoNow;
 
             $this->CLI->cls();
-            $this->CLI->clout("Geoscape Active".PHP_EOL);
+			$output = array("Geoscape Active", PHP_EOL);
+            $this->CLI->clout($output);
 
             $save = new YAML($this->geo);
 
@@ -247,6 +250,7 @@ class battleStatsClient
             }
 
         }
+		unset($saves);
         //$this->CLI->clout(' Check'.PHP_EOL);
     }
 
@@ -302,12 +306,14 @@ class battleStatsClient
             $return = false;
         }
 
+		unset($parts);
+		unset($temp);
+
         return $return;
     }
 
     private function loadOXC() {
         if (!is_object($this->oxc)) {
-
             $this->oxc = new OXC($this->mods);
             $this->oxc->collectMods($this->root.'standard');
         }
